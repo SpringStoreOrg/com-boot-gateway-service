@@ -20,9 +20,10 @@ public class SecurityTokenConfig extends WebSecurityConfigurerAdapter {
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-		http.csrf().disable()
+		http.cors().and().csrf().disable()
 				// make sure we use stateless session; session won't be used to store user's
 				// state.
+				
 				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
 				// handle an authorized attempts
 				.exceptionHandling()
@@ -43,4 +44,6 @@ public class SecurityTokenConfig extends WebSecurityConfigurerAdapter {
 	public JwtConfig jwtConfig() {
 		return new JwtConfig();
 	}
+
+
 }
