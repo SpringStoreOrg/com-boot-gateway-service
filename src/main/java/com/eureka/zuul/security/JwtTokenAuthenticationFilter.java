@@ -1,6 +1,8 @@
 package com.eureka.zuul.security;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -13,8 +15,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
-
-
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -53,7 +53,7 @@ public class JwtTokenAuthenticationFilter extends  OncePerRequestFilter {
 			
 			// 4. Validate the token
 			Claims claims = Jwts.parser()
-					.setSigningKey(jwtConfig.getSecret().getBytes())
+					.setSigningKey(Base64.getEncoder().encodeToString("encoded-key".getBytes(StandardCharsets.US_ASCII)))
 					.parseClaimsJws(token)
 					.getBody();
 			
