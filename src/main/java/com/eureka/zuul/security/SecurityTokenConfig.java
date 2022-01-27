@@ -38,6 +38,7 @@ public class SecurityTokenConfig extends WebSecurityConfigurerAdapter {
 				.antMatchers("/user/confirmUserAccount/*").permitAll()	
 				.antMatchers("/product/getAllProducts").permitAll()
 				.antMatchers("/product/getByProductCategory/*").permitAll()
+				.antMatchers("/product/getProductByProductName").permitAll()
 				// Any other request must be authenticated
 				.anyRequest().authenticated();
 	}
