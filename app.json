@@ -1,0 +1,6 @@
+{
+  "name": "Zuul Eureka Server",
+  "description": "Zuul Eureka Server demo project.",
+  "website": "https://github.com/GeorgeT88/com-boot-eureka-zuul-service",
+  "success_url": "/"
+}

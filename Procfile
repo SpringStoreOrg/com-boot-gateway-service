@@ -1,0 +1,1 @@
+web: java -jar target/eureka-zuul-service-1.0.jar --server.port=$PORT
