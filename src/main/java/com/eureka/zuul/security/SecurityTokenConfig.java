@@ -34,12 +34,11 @@ public class SecurityTokenConfig extends WebSecurityConfigurerAdapter {
 				.authorizeRequests()
 				// allow all who are accessing "auth" service
 				.antMatchers(HttpMethod.POST, jwtConfig.getUri()).permitAll()
-				.antMatchers(HttpMethod.POST,"/user/").permitAll()
+				.antMatchers(HttpMethod.POST,"/user/*").permitAll()
 				.antMatchers(HttpMethod.GET,"/user/confirm/*").permitAll()
 				.antMatchers(HttpMethod.PUT,"/user/confirm/*").permitAll()
-				.antMatchers(HttpMethod.GET,"/product/products").permitAll()
-				.antMatchers(HttpMethod.GET,"/product/productCategory/*").permitAll()
-				.antMatchers(HttpMethod.GET,"/product/").permitAll()
+				.antMatchers(HttpMethod.GET,"/product/*").permitAll()
+
 				// Any other request must be authenticated
 				.anyRequest().authenticated();
 	}
