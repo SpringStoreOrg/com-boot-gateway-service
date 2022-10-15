@@ -42,11 +42,4 @@ public class SecurityTokenConfig extends WebSecurityConfigurerAdapter {
 				// Any other request must be authenticated
 				.anyRequest().authenticated();
 	}
-
-	@Bean
-	public JwtConfig jwtConfig() {
-		return new JwtConfig();
-	}
-
-
 }
