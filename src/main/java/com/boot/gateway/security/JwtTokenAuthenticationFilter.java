@@ -1,4 +1,4 @@
-package com.eureka.zuul.security;
+package com.boot.gateway.security;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

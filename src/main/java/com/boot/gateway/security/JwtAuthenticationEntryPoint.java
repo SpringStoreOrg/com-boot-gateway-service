@@ -1,4 +1,4 @@
-package com.eureka.zuul.security;
+package com.boot.gateway.security;
 
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
