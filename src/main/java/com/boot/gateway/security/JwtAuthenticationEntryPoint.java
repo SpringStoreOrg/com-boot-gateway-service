@@ -1,26 +1,32 @@
 package com.boot.gateway.security;
 
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.web.server.ServerAuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
+import org.springframework.web.server.ServerWebExchange;
+import reactor.core.publisher.Mono;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 
 @Component
-public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
+public class JwtAuthenticationEntryPoint implements ServerAuthenticationEntryPoint {
     @Override
-    public void commence(HttpServletRequest httpServletRequest, HttpServletResponse response, AuthenticationException e) throws IOException, ServletException {
-        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "UNAUTHORIZED");
-        
-        // How to customize the retured message?
-        // Link: https://stackoverflow.com/a/40791087
-        String json = String.format("{\"message\": \"%s\"}", e.getMessage());
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-        response.getWriter().write(json);       
+    public Mono<Void> commence(ServerWebExchange exchange, AuthenticationException ex){
+        return Mono.fromRunnable(() -> {
+            ServerHttpResponse response = exchange.getResponse();
+            // How to customize the retured message?
+            // Link: https://stackoverflow.com/a/40791087
+            String json = String.format("{\"message\": \"%s\"}", ex.getMessage());
+            response.setStatusCode(HttpStatus.UNAUTHORIZED);
+            response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
+            response.getHeaders().setAcceptCharset(Collections.singletonList(StandardCharsets.UTF_8));
+            DataBuffer buf = exchange.getResponse().bufferFactory().wrap(json.getBytes(StandardCharsets.UTF_8));
+            response.writeWith(Mono.just(buf));
+        });
     }
 }
