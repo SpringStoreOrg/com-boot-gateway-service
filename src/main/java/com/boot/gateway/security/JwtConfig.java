@@ -1,4 +1,4 @@
-package com.eureka.zuul.security;
+package com.boot.gateway.security;
 
 import org.springframework.beans.factory.annotation.Value;
 
