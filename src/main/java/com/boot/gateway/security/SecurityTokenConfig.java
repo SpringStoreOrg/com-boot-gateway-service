@@ -14,6 +14,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.context.ServerSecurityContextRepository;
 import org.springframework.security.web.server.context.WebSessionServerSecurityContextRepository;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.reactive.CorsWebFilter;
+import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
 
 
 @EnableWebFluxSecurity // Enable security config. This annotation denotes config for spring security.
@@ -27,35 +32,6 @@ public class SecurityTokenConfig {
 
 	@Autowired
     private UserDetailsServiceImpl userDetailsService;
-/*
-    @Bean
-    public SecurityWebFilterChain webHttpSecurity(ServerHttpSecurity http) {
-		http.cors().and().csrf().disable()
-				// make sure we use stateless session; session won't be used to store user's
-				// state.
-
-				//.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-				// handle an authorized attempts
-				//.exceptionHandling()
-				//.authenticationEntryPoint((req, rsp, e) -> rsp.sendError(HttpServletResponse.SC_UNAUTHORIZED)).and()
-				// Add a filter to validate the tokens with every request
-				.addFilterAfter(new JwtTokenAuthenticationFilter(jwtConfig), UsernamePasswordAuthenticationFilter.class)
-				// authorization requests config
-				.authorizeRequests()
-				// allow all who are accessing "auth" service
-				//.antMatchers(HttpMethod.POST, jwtConfig.getUri()).permitAll()
-				//.antMatchers(HttpMethod.POST,"/user/*").permitAll()
-				//.antMatchers(HttpMethod.GET,"/user/confirm/*").permitAll()
-				//.antMatchers(HttpMethod.PUT,"/user/confirm/*").permitAll()
-				//.antMatchers(HttpMethod.GET,"/product/*").permitAll()
-				//.antMatchers(HttpMethod.GET,"/actuator/*").permitAll()
-
-				// Any other request must be authenticated
-				.anyRequest().authenticated();
-        return http.build();
-    }
-
-*/
 
 	@Bean
 	public PasswordEncoder passwordEncoder() {
@@ -94,12 +70,29 @@ public class SecurityTokenConfig {
 				.securityContextRepository(securityContextRepository())
 				.authenticationManager(authenticationManager)
 				.authorizeExchange()
-				.pathMatchers(HttpMethod.POST, jwtConfig.getUri(), "/user/*").permitAll()
+				.pathMatchers(HttpMethod.POST, jwtConfig.getUri(), "/user/", "/user/*").permitAll()
+				.pathMatchers(HttpMethod.OPTIONS, jwtConfig.getUri(), "/user/", "/user/*").permitAll()
 				.pathMatchers(HttpMethod.GET,"/user/confirm/*", "/product", "/product/*").permitAll()
 				.pathMatchers(HttpMethod.PUT,"/user/confirm/*").permitAll()
 				.pathMatchers(HttpMethod.GET,"/actuator", "/actuator/*").permitAll()
 				.and()
 				.addFilterAt(authenticationWebFilter, SecurityWebFiltersOrder.AUTHENTICATION)
 				.build();
+	}
+
+	@Bean
+	public CorsWebFilter corsFilter() {
+		CorsConfiguration corsConfiguration = new CorsConfiguration();
+		corsConfiguration.setAllowCredentials(true);
+		corsConfiguration.addAllowedOriginPattern("*");
+		corsConfiguration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"));
+		corsConfiguration.addAllowedHeader("origin");
+		corsConfiguration.addAllowedHeader("content-type");
+		corsConfiguration.addAllowedHeader("accept");
+		corsConfiguration.addAllowedHeader("authorization");
+		corsConfiguration.addAllowedHeader("cookie");
+		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+		source.registerCorsConfiguration("/**", corsConfiguration);
+		return new CorsWebFilter(source);
 	}
 }
