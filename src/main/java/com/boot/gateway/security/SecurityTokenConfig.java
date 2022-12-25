@@ -1,37 +1,29 @@
 package com.boot.gateway.security;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.authentication.ReactiveAuthenticationManager;
-import org.springframework.security.authentication.UserDetailsRepositoryReactiveAuthenticationManager;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
-import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.server.SecurityWebFilterChain;
-import org.springframework.security.web.server.context.ServerSecurityContextRepository;
-import org.springframework.security.web.server.context.WebSessionServerSecurityContextRepository;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsWebFilter;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
+import reactor.core.publisher.Mono;
 
 import java.util.Arrays;
 
 
-@EnableWebFluxSecurity // Enable security config. This annotation denotes config for spring security.
-@Configuration
+@AllArgsConstructor
+@EnableWebFluxSecurity
+@EnableReactiveMethodSecurity
 public class SecurityTokenConfig {
-    @Autowired
-    private JwtConfig jwtConfig;
-
-    @Autowired
-    private JwtTokenAuthenticationWebFilter authenticationWebFilter;
-
-	@Autowired
-    private UserDetailsServiceImpl userDetailsService;
+	private AuthenticationManager authenticationManager;
+	private SecurityContextRepository securityContextRepository;
 
 	@Bean
 	public PasswordEncoder passwordEncoder() {
@@ -39,45 +31,26 @@ public class SecurityTokenConfig {
 	}
 
 	@Bean
-	public ServerSecurityContextRepository securityContextRepository() {
-		WebSessionServerSecurityContextRepository securityContextRepository =
-				new WebSessionServerSecurityContextRepository();
-
-		securityContextRepository.setSpringSecurityContextAttrName("securityContext");
-
-		return securityContextRepository;
-	}
-
-	@Bean
-	public ReactiveAuthenticationManager authenticationManager() {
-		UserDetailsRepositoryReactiveAuthenticationManager authenticationManager =
-				new UserDetailsRepositoryReactiveAuthenticationManager(userDetailsService);
-
-		authenticationManager.setPasswordEncoder(passwordEncoder());
-
-		return authenticationManager;
-	}
-
-	@Bean
-	public SecurityWebFilterChain securityWebFiltersOrder(ServerHttpSecurity httpSecurity,
-														  ReactiveAuthenticationManager authenticationManager) {
-		return httpSecurity
-				.cors().disable()
+	public SecurityWebFilterChain securitygWebFilterChain(ServerHttpSecurity http) {
+		return http
+				.exceptionHandling()
+				.authenticationEntryPoint((swe, e) ->
+						Mono.fromRunnable(() -> swe.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED))
+				).accessDeniedHandler((swe, e) ->
+						Mono.fromRunnable(() -> swe.getResponse().setStatusCode(HttpStatus.FORBIDDEN))
+				).and()
 				.csrf().disable()
-				.httpBasic().disable()
-				.logout().disable()
 				.formLogin().disable()
-				.securityContextRepository(securityContextRepository())
+				.httpBasic().disable()
 				.authenticationManager(authenticationManager)
+				.securityContextRepository(securityContextRepository)
 				.authorizeExchange()
-				.pathMatchers(HttpMethod.POST, jwtConfig.getUri(), "/user/", "/user/*").permitAll()
-				.pathMatchers(HttpMethod.OPTIONS, jwtConfig.getUri(), "/user/", "/user/*").permitAll()
+				.pathMatchers(HttpMethod.OPTIONS).permitAll()
+				.pathMatchers(HttpMethod.POST,  "/login", "/user/", "/user/*").permitAll()
 				.pathMatchers(HttpMethod.GET,"/user/confirm/*", "/product", "/product/*").permitAll()
 				.pathMatchers(HttpMethod.PUT,"/user/confirm/*").permitAll()
-				.pathMatchers(HttpMethod.GET,"/actuator", "/actuator/*").permitAll()
-				.and()
-				.addFilterAt(authenticationWebFilter, SecurityWebFiltersOrder.AUTHENTICATION)
-				.build();
+				.anyExchange().authenticated()
+				.and().build();
 	}
 
 	@Bean
@@ -91,6 +64,7 @@ public class SecurityTokenConfig {
 		corsConfiguration.addAllowedHeader("accept");
 		corsConfiguration.addAllowedHeader("authorization");
 		corsConfiguration.addAllowedHeader("cookie");
+		corsConfiguration.setExposedHeaders(Arrays.asList("authorization"));
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		source.registerCorsConfiguration("/**", corsConfiguration);
 		return new CorsWebFilter(source);
