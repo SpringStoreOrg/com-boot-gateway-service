@@ -16,10 +16,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class JWTUtil {
 
-    @Value("${jjwt.secret}")
+    @Value("${jwt.secret}")
     private String secret;
 
-    @Value("${jjwt.expiration}")
+    @Value("${jwt.expiration.in.minutes}")
     private String expirationTime;
 
     private Key key;
@@ -53,9 +53,9 @@ public class JWTUtil {
     }
 
     private String doGenerateToken(Map<String, List> claims, String username) {
-        Long expirationTimeLong = Long.parseLong(expirationTime); //in second
+        Long expirationTimeInMinutes = Long.parseLong(expirationTime); //in minutes
         final Date createdDate = new Date();
-        final Date expirationDate = new Date(createdDate.getTime() + expirationTimeLong * 1000);
+        final Date expirationDate = new Date(createdDate.getTime() + expirationTimeInMinutes * 60 * 1000);
 
         return Jwts.builder()
                 .setClaims(claims)
