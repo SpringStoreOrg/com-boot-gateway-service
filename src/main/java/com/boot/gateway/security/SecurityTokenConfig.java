@@ -27,11 +27,11 @@ public class SecurityTokenConfig {
 
 	@Bean
 	public PasswordEncoder passwordEncoder() {
-		return new BCryptPasswordEncoder(11);
+		return new BCryptPasswordEncoder();
 	}
 
 	@Bean
-	public SecurityWebFilterChain securitygWebFilterChain(ServerHttpSecurity http) {
+	public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
 		return http
 				.exceptionHandling()
 				.authenticationEntryPoint((swe, e) ->
