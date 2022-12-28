@@ -1,6 +1,6 @@
 {
-  "name": "Zuul Eureka Server",
-  "description": "Zuul Eureka Server demo project.",
-  "website": "https://github.com/GeorgeT88/com-boot-eureka-zuul-service",
+  "name": "Gateway service",
+  "description": "Gateway service for Springwebstore application",
+  "website": "https://github.com/GeorgeT88/com-boot-gateway-service",
   "success_url": "/"
 }

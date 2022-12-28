@@ -5,7 +5,7 @@ import java.util.*;
 
 import javax.annotation.PostConstruct;
 
-import com.boot.services.model.User;
+import com.boot.gateway.dto.UserDTO;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -46,7 +46,7 @@ public class JWTUtil {
         return expiration.before(new Date());
     }
 
-    public String generateToken(User user) {
+    public String generateToken(UserDTO user) {
         Map<String, List> claims = new HashMap<>();
         claims.put("role", Arrays.asList(user.getRole()));
         return doGenerateToken(claims, user.getEmail());
