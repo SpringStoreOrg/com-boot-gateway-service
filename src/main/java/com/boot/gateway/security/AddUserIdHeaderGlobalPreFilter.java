@@ -1,7 +1,6 @@
 package com.boot.gateway.security;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
@@ -29,6 +28,7 @@ public class AddUserIdHeaderGlobalPreFilter implements GlobalFilter {
             ServerHttpRequest request = exchange.getRequest()
                     .mutate()
                     .header("User-Id", jwtUtil.getUserIdFromToken(authToken))
+                    .header("Username", jwtUtil.getUsernameFromToken(authToken))
                     .build();
 
             mutatedExchange = exchange.mutate().request(request).build();
