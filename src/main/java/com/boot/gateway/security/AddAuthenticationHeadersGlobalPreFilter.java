@@ -13,7 +13,7 @@ import reactor.core.publisher.Mono;
 
 @RequiredArgsConstructor
 @Component
-public class AddUserIdHeaderGlobalPreFilter implements GlobalFilter {
+public class AddAuthenticationHeadersGlobalPreFilter implements GlobalFilter {
     @Value("${jwt.prefix}")
     private String tokenPrefix;
 

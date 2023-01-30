@@ -10,8 +10,11 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
+import org.springframework.web.server.ServerWebExchange;
 
 @Component
 public class JWTUtil {
@@ -22,7 +25,12 @@ public class JWTUtil {
     @Value("${jwt.expiration.in.minutes}")
     private String expirationTime;
 
+    @Value("${jwt.prefix}")
+    private String tokenPrefix;
+
     private Key key;
+
+    public static final String AUTHORIZATION_HEADER = "Authorization";
 
     @PostConstruct
     public void init() {
@@ -51,12 +59,30 @@ public class JWTUtil {
     }
 
     public String generateToken(UserDTO user) {
-        Map<String, List> claims = new HashMap<>();
-        claims.put("role", Arrays.asList(user.getRole()));
+        Map<String, List<String>> claims = new HashMap<>();
+        claims.put("role", user.getRoles());
         return doGenerateToken(claims, user.getEmail(), user.getId());
     }
 
-    private String doGenerateToken(Map<String, List> claims, String username, long userId) {
+    public boolean hasRole(ServerWebExchange exchange, String role){
+        String token = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
+        if(StringUtils.isNotEmpty(token) && token.startsWith(tokenPrefix)){
+            String authToken = token.substring(tokenPrefix.length());
+
+            return hasRole(authToken, role);
+        }
+
+        return false;
+    }
+
+    public boolean hasRole(String token, String role) {
+        return getAllClaimsFromToken(token)
+                .get("role", List.class).stream()
+                .anyMatch(item -> role.equalsIgnoreCase(String.valueOf(item)));
+    }
+
+
+    private String doGenerateToken(Map<String, List<String>> claims, String username, long userId) {
         Long expirationTimeInMinutes = Long.parseLong(expirationTime); //in minutes
         final Date createdDate = new Date();
         final Date expirationDate = new Date(createdDate.getTime() + expirationTimeInMinutes * 60 * 1000);

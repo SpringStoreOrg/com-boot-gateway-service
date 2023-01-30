@@ -1,5 +1,6 @@
 package com.boot.gateway.controller;
 
+import com.boot.gateway.security.LoginNotAllowedException;
 import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
@@ -16,6 +17,10 @@ public class RestWebExceptionHandler implements WebExceptionHandler {
     public Mono<Void> handle(ServerWebExchange exchange, Throwable ex) {
 
         if (ex instanceof ExpiredJwtException) {
+            exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
+            return exchange.getResponse().setComplete();
+        }
+        if (ex instanceof LoginNotAllowedException) {
             exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
             return exchange.getResponse().setComplete();
         }
