@@ -36,7 +36,7 @@ public class AuthenticationController {
     public Mono<ResponseEntity<AuthResponse>> login(@RequestBody AuthRequest request) {
         return userServiceClient
                 .get()
-                .uri("/?email="+request.getEmail())
+                .uri("/" + request.getEmail())
                 .retrieve()
                 .bodyToMono(UserDTO.class)
                 .filter(userDetails -> passwordEncoder.matches(request.getPassword(), userDetails.getPassword()))
@@ -44,7 +44,7 @@ public class AuthenticationController {
                             if (userDetails.getRoles().stream().anyMatch(role -> loginRoleName.equalsIgnoreCase(role))) {
                                 return ResponseEntity.ok()
                                         .header(AUTHORIZATION_HEADER, tokenPrefix + jwtUtil.generateToken(userDetails))
-                                        .body(new AuthResponse(userDetails.getEmail()));
+                                        .body(new AuthResponse(userDetails.getEmail(), userDetails.getFirstName(), userDetails.getLastName()));
                             }
                             throw new LoginNotAllowedException();
                         }
