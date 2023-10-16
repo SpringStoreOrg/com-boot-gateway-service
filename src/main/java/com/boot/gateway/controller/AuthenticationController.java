@@ -36,7 +36,7 @@ public class AuthenticationController {
     public Mono<ResponseEntity<AuthResponse>> login(@RequestBody AuthRequest request) {
         return userServiceClient
                 .get()
-                .uri("/" + request.getEmail())
+                .uri("/" + request.getEmail()+"?includePassword=true")
                 .retrieve()
                 .bodyToMono(UserDTO.class)
                 .filter(userDetails -> passwordEncoder.matches(request.getPassword(), userDetails.getPassword()))
