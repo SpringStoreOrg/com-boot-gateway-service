@@ -5,9 +5,9 @@ import com.boot.gateway.model.AuthRequest;
 import com.boot.gateway.model.AuthResponse;
 import com.boot.gateway.security.JWTUtil;
 import com.boot.gateway.security.LoginNotAllowedException;
+import com.boot.gateway.security.UserLoginException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 
 import static com.boot.gateway.security.JWTUtil.AUTHORIZATION_HEADER;
@@ -36,9 +37,16 @@ public class AuthenticationController {
     public Mono<ResponseEntity<AuthResponse>> login(@RequestBody AuthRequest request) {
         return userServiceClient
                 .get()
-                .uri("/" + request.getEmail()+"?includePassword=true")
+                .uri("/" + request.getEmail() + "?includePassword=true")
                 .retrieve()
                 .bodyToMono(UserDTO.class)
+                .onErrorMap((Throwable error) -> {
+                    if(error instanceof WebClientResponseException){
+                        WebClientResponseException exception = (WebClientResponseException) error;
+                        throw new UserLoginException(exception.getStatusCode(), exception.getResponseBodyAsString());
+                    }
+                    return error;
+                })
                 .filter(userDetails -> passwordEncoder.matches(request.getPassword(), userDetails.getPassword()))
                 .map(userDetails -> {
                             if (userDetails.getRoles().stream().anyMatch(role -> loginRoleName.equalsIgnoreCase(role))) {
