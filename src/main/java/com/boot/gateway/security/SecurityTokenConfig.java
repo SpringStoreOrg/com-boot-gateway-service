@@ -47,7 +47,7 @@ public class SecurityTokenConfig {
 				.authorizeExchange()
 				.pathMatchers(HttpMethod.OPTIONS).permitAll()
 				.pathMatchers(HttpMethod.POST,  "/login", "/user/", "/user/*", "/user/customerMessage").permitAll()
-				.pathMatchers(HttpMethod.GET,"/user/confirm/*", "/product", "/product/*").permitAll()
+				.pathMatchers(HttpMethod.GET, "/user/confirm/*", "/product", "/product/*", "/order/*").permitAll()
 				.pathMatchers(HttpMethod.PUT,"/user/confirm/*", "/user/password/reset/*", "/user/password/change").permitAll()
 				.anyExchange().authenticated()
 				.and().build();
