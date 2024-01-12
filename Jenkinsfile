@@ -58,7 +58,7 @@ pipeline {
             }
             steps{
                 sh """
-                    helm upgrade --install gateway-service ./helm/gateway-service --set image.tag=arm64-main-${shortGitCommit}
+                    helm upgrade --install gateway-service --namespace fractalwoodstories --create-namespace ./helm/gateway-service --set image.tag=arm64-main-${shortGitCommit}
                 """
             }
         }
