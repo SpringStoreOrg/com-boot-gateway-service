@@ -46,20 +46,19 @@ ingress:
   annotations: 
     nginx.ingress.kubernetes.io/use-regex: "true"
     nginx.ingress.kubernetes.io/rewrite-target: /$2
-    # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
+    cert-manager.io/cluster-issuer: "letsencrypt-production"
   hosts:
-    - host: calypso-binar.com
+    - host: fractalwoodstories.com
       paths:
         - path: "/api(/|$)(.*)"
           pathType: ImplementationSpecific
     - paths:
         - path: "/api(/|$)(.*)"
           pathType: ImplementationSpecific
-  tls: []
-  #  - secretName: chart-example-tls
-  #    hosts:
-  #      - chart-example.local
+  tls:
+    - secretName: letsencrypt-production
+      hosts:
+        - fractalwoodstories.com
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
