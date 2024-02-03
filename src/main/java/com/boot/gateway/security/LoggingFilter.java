@@ -23,7 +23,7 @@ public class LoggingFilter implements GlobalFilter, Ordered {
                 .then(Mono.fromRunnable(() -> {
                     Instant finish = Instant.now();
                     long time = Duration.between(start, finish).toMillis();
-                    log.info("{}: {}ms", exchange.getRequest().getPath(),  time);
+                    log.info("{}:{}:{}ms", exchange.getRequest().getPath(), exchange.getResponse().getStatusCode(),time);
                 }));
     }
 
